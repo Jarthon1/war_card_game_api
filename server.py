@@ -1,57 +1,74 @@
-# This is the File that sets up and manages the RESTful server supporting the card game War.
 from flask import Flask, jsonify, request
+from flask_sqlalchemy import SQLAlchemy
 
 from war import war_card_game
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///war_card_game.db'  # SQLite database file path
+db = SQLAlchemy(app)
 
-games = []  # List to store game information
-wins = {'player1':0,'player2':0}
+# Define a Game model to represent games in the database
+class Game(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    status = db.Column(db.String(20))
+    winner = db.Column(db.String(20))
+    game_data = db.Column(db.PickleType())
 
-@app.route('/games', methods=['POST'])  # Define a new endpoint for setting up a game with POST method
+    def __init__(self, status, winner, game_data):
+        self.status = status
+        self.winner = winner
+        self.game_data = game_data
+
+# Define a Win model to represent win records in the database
+class Player(db.Model):
+    player = db.Column(db.String(20))
+    wins = db.Column(db.Integer)
+
+    def __init__(self, player, wins):
+        self.player = player
+        self.wins = wins
+
+with app.app_context():
+    db.create_all() # Create the database tables
+
+@app.route('/games', methods=['POST'])
 def start_game():
-    game_id = len(games) + 1  # Generate a new game ID
+    game_id = Game.query.count() + 1  # Generate a new game ID
     game = war_card_game()
-    game_data = {'id': game_id, 'status': 'started', 'game': game, 'winner':'N/A'}  # Create a new game object
-    games.append(game_data)  # Add the game to the games list
-    return jsonify({'message': f'Game {game_id} started!', 'game_id': game_id}), 201  # Return a JSON response with game ID and message
+    game_data = Game(status='started', winner='N/A', game_data=game)  # Create a new game object
+    db.session.add(game_data)  # Add the game to the database
+    db.session.commit()  # Commit the changes to the database
+    return jsonify({'message': f'Game {game_id} started!', 'game_id': game_id}), 201
 
-@app.route('/games/<int:game_id>', methods=['POST'])  # Define a new endpoint for actually running a game with POST method
+@app.route('/games/<int:game_id>', methods=['POST'])
 def run_game(game_id):
-    game = get_game_by_id(game_id)
+    game = Game.query.get(game_id)  # Get the game object by ID from the database
     if not game:
-        return jsonify({'error': 'Game not found'}), 404 # Return an error message (conflict) if gamestate is not playable
-    if game['status'] != 'started':
-        return jsonify({'error': 'Game not playable'}), 409 # Return an error message (conflict) if gamestate is not playable
+        return jsonify({'error': 'Game not found'}), 404
+    if game.status != 'started':
+        return jsonify({'error': 'Game not playable'}), 409
     else:
-        winner = game['game'].play_game()
-        wins[winner] += 1
-        game['winner'] = winner
-        game['status'] = 'finished'
-        return jsonify({'message': f'Game {game_id} finished!', 'winner': game['winner']}), 201  # Return a JSON response with game ID and message
-        
-@app.route('/games/<int:game_id>', methods=['GET'])  # Define a new endpoint for getting game history with GET method
+        winner = game.game_data.play_game()
+        game.winner = winner
+        game.status = 'finished'
+        db.session.commit()  # Commit the changes to the database
+        return jsonify({'message': f'Game {game_id} finished!', 'winner': game.winner}), 201
+
+@app.route('/games/<int:game_id>', methods=['GET'])
 def get_game_status(game_id):
-    game = get_game_by_id(game_id)  # Get the game object by ID
+    game = Game.query.get(game_id)  # Get the game object by ID from the database
     if game:
-        return jsonify({'status': game['status'], 'winner': game['winner']})  # Return the game's history as JSON response
+        return jsonify({'status': game.status, 'winner': game.winner})
     else:
-        return jsonify({'error': 'Game not found'}), 404  # Return an error message if game not found
-    
-@app.route('/wins/<string:player>', methods=['GET'])  # Define a new endpoint for getting the win record with GET method
+        return jsonify({'error': 'Game not found'}), 404
+
+@app.route('/wins/<string:player>', methods=['GET'])
 def get_history(player):
-    if player in wins:
-        return jsonify({'lifetime_wins' : wins[player]})
+    win = Player.query.filter_by(player=player).first()  # Get the win record for the player from the database
+    if win:
+        return jsonify({'lifetime_wins': win.wins})
     else:
         return jsonify({'error': 'Player not found'}), 404
 
-
-# Retrieve a game by its id
-def get_game_by_id(game_id):
-    for game in games:  # Iterate through games list to find game with matching ID
-        if game['id'] == game_id:
-            return game  # Return the game object if found
-    return None  # Return None if game not found
-
 if __name__ == '__main__':
-    app.run(debug=True)  # Start the Flask app in debug mode for development
+    app.run(debug=True)
