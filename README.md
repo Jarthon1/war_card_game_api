@@ -26,5 +26,10 @@ GET /wins/string:player - retrieves the number of lifetime wins of a player with
 POST /player/string:player_name - creates a new player with the specified name and returns a message indicating the player has been created.
 
 
+Personally, I used the REST Client extension on VS code for most of my testing and interaction, but I also tested using a web browser and got identical results.
+
+Given more time to advance this project the next thing I would love to add would be a basic UI to provide a more human friendly interaction method for . My basic aproach to this to get somethign working would be a simple HTML page with reference links to the vairous endpoints 
+and further pages that would display the resultin JSON in a more digestible manner.
+
 
 
