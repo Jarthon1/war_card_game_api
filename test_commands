@@ -11,3 +11,25 @@ get http://127.0.0.1:5000/games/1
 ###
 
 get http://127.0.0.1:5000/wins/player2
+
+###
+
+post http://127.0.0.1:5000/player/Josh
+
+###
+
+get http://127.0.0.1:5000/wins/Josh
+
+###
+
+post http://127.0.0.1:5000/games/Josh/vs/player1 
+
+###
+
+post http://127.0.0.1:5000/games/6
+
+###
+
+Get http://127.0.0.1:5000/games/6
+
+

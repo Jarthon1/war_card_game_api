@@ -48,7 +48,16 @@ def start_game():
     game_data = Game(status='started', winner='N/A', game_data=game)  # Create a new game object
     db.session.add(game_data)  # Add the game to the database
     db.session.commit()  # Commit the changes to the database
-    return jsonify({'message': f'Game {game_id} started!', 'game_id': game_id}), 201
+    return jsonify({'message': f'Game {game_id} started!', 'game_id': game_id, 'players' : ('player1','player2')}), 201
+
+@app.route('/games/<string:player1>/vs/<string:player2>', methods=['POST'])
+def start_game_with_players(player1,player2):
+    game_id = Game.query.count() + 1  # Generate a new game ID
+    game = war_card_game(player1,player2)
+    game_data = Game(status='started', winner='N/A', game_data=game)  # Create a new game object
+    db.session.add(game_data)  # Add the game to the database
+    db.session.commit()  # Commit the changes to the database
+    return jsonify({'message': f'Game {game_id} started!', 'game_id': game_id, 'players' : (player1,player2)}), 201
 
 @app.route('/games/<int:game_id>', methods=['POST'])
 def run_game(game_id):
@@ -84,6 +93,15 @@ def get_history(player):
         return jsonify({'lifetime_wins': win.wins})
     else:
         return jsonify({'error': 'Player not found'}), 404
+    
+
+@app.route('/player/<string:player_name>', methods=['POST'])
+def create_player(player_name):
+    player = Player(player_name,0)# Create a new player object
+    db.session.add(player)  # Add the player to the database
+    db.session.commit()  # Commit the changes to the database
+    return jsonify({'message': f'New player {player_name} created!'}), 201
+        
 
 if __name__ == '__main__':
     app.run(debug=True)

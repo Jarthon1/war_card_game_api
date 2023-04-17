@@ -14,9 +14,11 @@ DECK = ['C0','C1','C2','C3','C4','C5','C6','C7','C8','C9','CAJ','CBQ','CCK','CDA
 
 # GAME LOGIC
 class war_card_game:
-	def __init__(self):
+	def __init__(self,player1='player1',player2='player2'):
 		# STEP 1 SETUP:
 		# GAMESTATE:
+		self.player1 = player1
+		self.player2 = player2
 		self.game_over = False
 		self.watch_mode = False
 		self.winner = None
@@ -59,9 +61,9 @@ class war_card_game:
 			if (len(self.P1_Deck) < 2 or len(self.P2_Deck) < 2) and not self.game_over:
 				self.game_over = True
 				if (len(self.P1_Deck) > len(self.P2_Deck)): 
-					self.winner = 1 
+					self.winner = self.player1
 				else: 
-					self.winner = 2
+					self.winner = self.player2
 				print(f"GAMEOVER !! Player {self.winner} won!\n")
 				break
 			
@@ -98,9 +100,9 @@ class war_card_game:
 		if not self.P1_Deck or not self.P2_Deck and not self.game_over:
 			self.game_over = True
 			if (len(self.P1_Deck) > len(self.P2_Deck)): 
-				self.winner = 'player1' 
+				self.winner = self.player1
 			else: 
-				self.winner = 'player2'
+				self.winner = self.player2
 			print(f"GAMEOVER !! Player {self.winner} won!\n")
 		return self.winner
 
