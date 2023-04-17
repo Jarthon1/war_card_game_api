@@ -2,8 +2,12 @@ post http://127.0.0.1:5000/games
 
 ###
 
-get http://127.0.0.1:5000/games/2
+get http://127.0.0.1:5000/games/6
 
 ###
 
-post http://127.0.0.1:5000/games/2
+post http://127.0.0.1:5000/games/6
+
+###
+
+get http://127.0.0.1:5000/wins/player2

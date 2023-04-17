@@ -6,6 +6,7 @@ from war import war_card_game
 app = Flask(__name__)
 
 games = []  # List to store game information
+wins = {'player1':0,'player2':0}
 
 @app.route('/games', methods=['POST'])  # Define a new endpoint for setting up a game with POST method
 def start_game():
@@ -24,7 +25,7 @@ def run_game(game_id):
         return jsonify({'error': 'Game not playable'}), 409 # Return an error message (conflict) if gamestate is not playable
     else:
         winner = game['game'].play_game()
-        print(winner)
+        wins[winner] += 1
         game['winner'] = winner
         game['status'] = 'finished'
         return jsonify({'message': f'Game {game_id} finished!', 'winner': game['winner']}), 201  # Return a JSON response with game ID and message
@@ -36,6 +37,14 @@ def get_game_status(game_id):
         return jsonify({'status': game['status'], 'winner': game['winner']})  # Return the game's history as JSON response
     else:
         return jsonify({'error': 'Game not found'}), 404  # Return an error message if game not found
+    
+@app.route('/wins/<string:player>', methods=['GET'])  # Define a new endpoint for getting the win record with GET method
+def get_history(player):
+    if player in wins:
+        return jsonify({'lifetime_wins' : wins[player]})
+    else:
+        return jsonify({'error': 'Player not found'}), 404
+
 
 # Retrieve a game by its id
 def get_game_by_id(game_id):
