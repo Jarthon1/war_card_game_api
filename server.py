@@ -20,12 +20,14 @@ def run_game(game_id):
     game = get_game_by_id(game_id)
     if not game:
         return jsonify({'error': 'Game not found'}), 404 # Return an error message (conflict) if gamestate is not playable
-    if games[game_id]['status'] != 'started':
+    if game['status'] != 'started':
         return jsonify({'error': 'Game not playable'}), 409 # Return an error message (conflict) if gamestate is not playable
     else:
         winner = game['game'].play_game()
+        print(winner)
         game['winner'] = winner
         game['status'] = 'finished'
+        return jsonify({'message': f'Game {game_id} finished!', 'winner': game['winner']}), 201  # Return a JSON response with game ID and message
         
 @app.route('/games/<int:game_id>', methods=['GET'])  # Define a new endpoint for getting game history with GET method
 def get_game_status(game_id):

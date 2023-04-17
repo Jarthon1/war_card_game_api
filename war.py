@@ -36,11 +36,12 @@ class war_card_game:
 		self.P2_Deck = copy(self.play_deck[26:52])
 
 	# STEP 2 GAMEPLAY
-	def play_game(self): # Plays a full game of war
+	def play_game(self, watch_mode = False): # Plays a full game of war
+		
 		# Gameplay Loop
 		while not self.game_over:
-			self.play_turn()
-		return self.winner()
+			self.play_turn(watch_mode)
+		return self.winner
 	
 	def play_turn(self, watch_mode = False): # plays the next turn of war
 		# Take the top card from each deck
@@ -62,7 +63,7 @@ class war_card_game:
 				else: 
 					self.winner = 2
 				print(f"GAMEOVER !! Player {self.winner} won!\n")
-				return
+				break
 			
 			# Otherwise add the current face up cards to the war decks
 			self.P1_Temp.append(p1_card)
@@ -95,13 +96,13 @@ class war_card_game:
 
 		# Now check if the game is over, and if so, update the winner accordingly
 		if not self.P1_Deck or not self.P2_Deck and not self.game_over:
-			self.game_over == True
+			self.game_over = True
 			if (len(self.P1_Deck) > len(self.P2_Deck)): 
 				self.winner = 'player1' 
 			else: 
 				self.winner = 'player2'
 			print(f"GAMEOVER !! Player {self.winner} won!\n")
-		return
+		return self.winner
 
 
 
