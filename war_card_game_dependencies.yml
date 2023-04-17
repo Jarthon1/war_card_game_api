@@ -1,0 +1,5 @@
+name: war_card_game
+channels:
+  - conda-forge
+  - defaults
+prefix: /Users/josh/miniconda3/envs/war_card_game
