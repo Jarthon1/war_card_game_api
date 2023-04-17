@@ -36,7 +36,7 @@ class war_card_game:
 		self.P2_Deck = copy(self.play_deck[26:52])
 
 	# STEP 2 GAMEPLAY
-	def play_game(self,player1,player2): # Plays a full game of war
+	def play_game(self): # Plays a full game of war
 		# Gameplay Loop
 		while not self.game_over:
 			self.play_turn()
@@ -97,9 +97,9 @@ class war_card_game:
 		if not self.P1_Deck or not self.P2_Deck and not self.game_over:
 			self.game_over == True
 			if (len(self.P1_Deck) > len(self.P2_Deck)): 
-				self.winner = 1 
+				self.winner = 'player1' 
 			else: 
-				self.winner = 2
+				self.winner = 'player2'
 			print(f"GAMEOVER !! Player {self.winner} won!\n")
 		return
 
