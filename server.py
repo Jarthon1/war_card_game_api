@@ -21,7 +21,7 @@ class Game(db.Model):
 
 # Define a Win model to represent win records in the database
 class Player(db.Model):
-    player = db.Column(db.String(20))
+    player = db.Column(db.String(20),primary_key=True)
     wins = db.Column(db.Integer)
 
     def __init__(self, player, wins):
@@ -30,6 +30,16 @@ class Player(db.Model):
 
 with app.app_context():
     db.create_all() # Create the database tables
+
+    # Initialize the default players if not already present
+    if not Player.query.filter_by(player='player1').first():
+        player1 = Player('player1',0)
+        db.session.add(player1)
+    if not Player.query.filter_by(player='player2').first():
+        player2 = Player('player2',0)
+        db.session.add(player2)
+    db.session.commit()
+
 
 @app.route('/games', methods=['POST'])
 def start_game():
@@ -51,6 +61,11 @@ def run_game(game_id):
         winner = game.game_data.play_game()
         game.winner = winner
         game.status = 'finished'
+        player = Player.query.filter_by(player=game.winner).first()
+        if player:
+            player.wins += 1
+        else:
+            return jsonify({'error': 'Game contains unknown player'}), 500
         db.session.commit()  # Commit the changes to the database
         return jsonify({'message': f'Game {game_id} finished!', 'winner': game.winner}), 201
 
